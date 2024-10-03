@@ -1,8 +1,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: employees-config
+  name: {{ .Release.Name }}-init-sql-configmap
 data:
+  init.sql: |
+    -- Create the employees table if it doesn't exist
+    CREATE TABLE IF NOT EXISTS employees (
+      employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT,
+      last_name TEXT,
+      department TEXT,
+      job_title TEXT,
+      email TEXT,
+      phone_number TEXT,
+      hire_date DATE,
+      status TEXT
+    );
+    
   index.php: |
     <?php
     // Connection details
