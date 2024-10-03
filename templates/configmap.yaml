@@ -1,174 +1,104 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-init-sql-configmap
-data:
-  init.sql: |
-    -- Create the employees table if it doesn't exist
-    CREATE TABLE IF NOT EXISTS employees (
-      employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      first_name TEXT,
-      last_name TEXT,
-      department TEXT,
-      job_title TEXT,
-      email TEXT,
-      phone_number TEXT,
-      hire_date DATE,
-      status TEXT
-    );
+<?php
+// Connection details
+$dbname = '/var/www/html/employees.db'; // Path to your SQLite database file
+$dsn = "sqlite:$dbname";
 
-    -- Insert 10 sample employees if the table is empty
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'John', 'Doe', 'Sales', 'Sales Manager', 'john.doe@example.com', '(555) 123-4567', '2020-01-15', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+try {
+    // Connect to SQLite database
+    $pdo = new PDO($dsn);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Jane', 'Smith', 'Marketing', 'Marketing Specialist', 'jane.smith@example.com', '(555) 234-5678', '2021-03-20', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+    // Check if the employees table exists
+    $result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='employees';");
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Alice', 'Johnson', 'IT', 'Software Engineer', 'alice.johnson@example.com', '(555) 345-6789', '2019-07-11', 'Inactive'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+    // If the employees table does not exist, run the SQL initialization script
+    if ($result->fetchColumn() === false) {
+        // SQL script (previously inside init.sql) embedded directly in the PHP code
+        $sql = "
+            CREATE TABLE IF NOT EXISTS employees (
+              employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              first_name TEXT,
+              last_name TEXT,
+              department TEXT,
+              job_title TEXT,
+              email TEXT,
+              phone_number TEXT,
+              hire_date DATE,
+              status TEXT
+            );
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Bob', 'Brown', 'HR', 'HR Manager', 'bob.brown@example.com', '(555) 456-7890', '2018-11-05', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            -- Insert sample employees if the table is empty
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'John', 'Doe', 'Sales', 'Sales Manager', 'john.doe@example.com', '(555) 123-4567', '2020-01-15', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Charlie', 'Davis', 'Finance', 'Accountant', 'charlie.davis@example.com', '(555) 567-8901', '2022-02-14', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Jane', 'Smith', 'Marketing', 'Marketing Specialist', 'jane.smith@example.com', '(555) 234-5678', '2021-03-20', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Diana', 'Moore', 'Sales', 'Sales Associate', 'diana.moore@example.com', '(555) 678-9012', '2023-05-01', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Alice', 'Johnson', 'IT', 'Software Engineer', 'alice.johnson@example.com', '(555) 345-6789', '2019-07-11', 'Inactive'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Ethan', 'Clark', 'Marketing', 'SEO Specialist', 'ethan.clark@example.com', '(555) 789-0123', '2023-06-10', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Bob', 'Brown', 'HR', 'HR Manager', 'bob.brown@example.com', '(555) 456-7890', '2018-11-05', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Fiona', 'Adams', 'IT', 'Systems Analyst', 'fiona.adams@example.com', '(555) 890-1234', '2022-09-15', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Charlie', 'Davis', 'Finance', 'Accountant', 'charlie.davis@example.com', '(555) 567-8901', '2022-02-14', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'George', 'Wright', 'Finance', 'Financial Analyst', 'george.wright@example.com', '(555) 901-2345', '2020-04-22', 'Inactive'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Diana', 'Moore', 'Sales', 'Sales Associate', 'diana.moore@example.com', '(555) 678-9012', '2023-05-01', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-    SELECT 'Hannah', 'Baker', 'HR', 'Recruiter', 'hannah.baker@example.com', '(555) 012-3456', '2021-08-30', 'Active'
-    WHERE NOT EXISTS (SELECT 1 FROM employees);
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Ethan', 'Clark', 'Marketing', 'SEO Specialist', 'ethan.clark@example.com', '(555) 789-0123', '2023-06-10', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-  index.php: |
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Employees List</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                padding: 0;
-                background-color: #f4f4f4;
-            }
-            h1 {
-                color: #333;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 20px 0;
-            }
-            table, th, td {
-                border: 1px solid #ddd;
-            }
-            th, td {
-                padding: 12px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-            input[type="text"] {
-                padding: 8px;
-                width: 300px;
-                margin: 10px 0;
-            }
-        </style>
-        <script>
-            // Search Functionality
-            function searchUsers() {
-                var input, filter, table, tr, td, i, txtValue;
-                input = document.getElementById("searchInput");
-                filter = input.value.toUpperCase();
-                table = document.getElementById("employeesTable");
-                tr = table.getElementsByTagName("tr");
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Fiona', 'Adams', 'IT', 'Systems Analyst', 'fiona.adams@example.com', '(555) 890-1234', '2022-09-15', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-                for (i = 1; i < tr.length; i++) {
-                    tr[i].style.display = "none";
-                    td = tr[i].getElementsByTagName("td");
-                    for (var j = 0; j < td.length; j++) {
-                        if (td[j]) {
-                            txtValue = td[j].textContent || td[j].innerText;
-                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                                tr[i].style.display = "";
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        </script>
-    </head>
-    <body>
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'George', 'Wright', 'Finance', 'Financial Analyst', 'george.wright@example.com', '(555) 901-2345', '2020-04-22', 'Inactive'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
 
-    <h1>Employees List</h1>
+            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+            SELECT 'Hannah', 'Baker', 'HR', 'Recruiter', 'hannah.baker@example.com', '(555) 012-3456', '2021-08-30', 'Active'
+            WHERE NOT EXISTS (SELECT 1 FROM employees);
+        ";
 
-    <!-- Search Box -->
-    <input type="text" id="searchInput" onkeyup="searchUsers()" placeholder="Search for names or emails..">
-
-    <?php
-    // Connection details
-    $dbname = '/var/www/html/employees.db'; // Path to your SQLite database file
-
-    // Create a new PDO instance for SQLite
-    $dsn = "sqlite:$dbname";
-
-    try {
-        // Connect to SQLite database
-        $pdo = new PDO($dsn);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Fetch data from the employees table
-        $stmt = $pdo->query("SELECT * FROM employees");
-        $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Start of table
-        echo "<table id='employeesTable'>";
-        echo "<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Department</th><th>Job Title</th><th>Email</th><th>Phone</th><th>Hire Date</th><th>Status</th></tr>";
-
-        // Display the employees in the table
-        foreach ($employees as $employee) {
-            echo "<tr>
-                    <td>{$employee['employee_id']}</td>
-                    <td>{$employee['first_name']}</td>
-                    <td>{$employee['last_name']}</td>
-                    <td>{$employee['department']}</td>
-                    <td>{$employee['job_title']}</td>
-                    <td>{$employee['email']}</td>
-                    <td>{$employee['phone_number']}</td>
-                    <td>{$employee['hire_date']}</td>
-                    <td>{$employee['status']}</td>
-                  </tr>";
-        }
-
-        echo "</table>";
-
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        // Execute the SQL script
+        $pdo->exec($sql);
     }
-    ?>
 
-    </body>
-    </html>
+    // Fetch data from the employees table
+    $stmt = $pdo->query("SELECT * FROM employees");
+    $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Display the employees in the table
+    echo "<h1>Employees List</h1>";
+    echo "<table id='employeesTable'>";
+    echo "<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Department</th><th>Job Title</th><th>Email</th><th>Phone</th><th>Hire Date</th><th>Status</th></tr>";
+
+    foreach ($employees as $employee) {
+        echo "<tr>
+                <td>{$employee['employee_id']}</td>
+                <td>{$employee['first_name']}</td>
+                <td>{$employee['last_name']}</td>
+                <td>{$employee['department']}</td>
+                <td>{$employee['job_title']}</td>
+                <td>{$employee['email']}</td>
+                <td>{$employee['phone_number']}</td>
+                <td>{$employee['hire_date']}</td>
+                <td>{$employee['status']}</td>
+              </tr>";
+    }
+
+    echo "</table>";
+
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
