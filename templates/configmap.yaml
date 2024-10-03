@@ -13,8 +13,8 @@ try {
 
     // If the employees table does not exist, run the SQL initialization script
     if ($result->fetchColumn() === false) {
-        // SQL script (previously inside init.sql) embedded directly in the PHP code
-        $sql = "
+        // Create the employees table
+        $pdo->exec("
             CREATE TABLE IF NOT EXISTS employees (
               employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
               first_name TEXT,
@@ -26,51 +26,55 @@ try {
               hire_date DATE,
               status TEXT
             );
+        ");
 
-            -- Insert sample employees if the table is empty
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'John', 'Doe', 'Sales', 'Sales Manager', 'john.doe@example.com', '(555) 123-4567', '2020-01-15', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+        // Insert sample employees if the table is empty
+        $insertStatements = [
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'John', 'Doe', 'Sales', 'Sales Manager', 'john.doe@example.com', '(555) 123-4567', '2020-01-15', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Jane', 'Smith', 'Marketing', 'Marketing Specialist', 'jane.smith@example.com', '(555) 234-5678', '2021-03-20', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Jane', 'Smith', 'Marketing', 'Marketing Specialist', 'jane.smith@example.com', '(555) 234-5678', '2021-03-20', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Alice', 'Johnson', 'IT', 'Software Engineer', 'alice.johnson@example.com', '(555) 345-6789', '2019-07-11', 'Inactive'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Alice', 'Johnson', 'IT', 'Software Engineer', 'alice.johnson@example.com', '(555) 345-6789', '2019-07-11', 'Inactive'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Bob', 'Brown', 'HR', 'HR Manager', 'bob.brown@example.com', '(555) 456-7890', '2018-11-05', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Bob', 'Brown', 'HR', 'HR Manager', 'bob.brown@example.com', '(555) 456-7890', '2018-11-05', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Charlie', 'Davis', 'Finance', 'Accountant', 'charlie.davis@example.com', '(555) 567-8901', '2022-02-14', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Charlie', 'Davis', 'Finance', 'Accountant', 'charlie.davis@example.com', '(555) 567-8901', '2022-02-14', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Diana', 'Moore', 'Sales', 'Sales Associate', 'diana.moore@example.com', '(555) 678-9012', '2023-05-01', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Diana', 'Moore', 'Sales', 'Sales Associate', 'diana.moore@example.com', '(555) 678-9012', '2023-05-01', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Ethan', 'Clark', 'Marketing', 'SEO Specialist', 'ethan.clark@example.com', '(555) 789-0123', '2023-06-10', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Ethan', 'Clark', 'Marketing', 'SEO Specialist', 'ethan.clark@example.com', '(555) 789-0123', '2023-06-10', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Fiona', 'Adams', 'IT', 'Systems Analyst', 'fiona.adams@example.com', '(555) 890-1234', '2022-09-15', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Fiona', 'Adams', 'IT', 'Systems Analyst', 'fiona.adams@example.com', '(555) 890-1234', '2022-09-15', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'George', 'Wright', 'Finance', 'Financial Analyst', 'george.wright@example.com', '(555) 901-2345', '2020-04-22', 'Inactive'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'George', 'Wright', 'Finance', 'Financial Analyst', 'george.wright@example.com', '(555) 901-2345', '2020-04-22', 'Inactive'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);",
 
-            INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
-            SELECT 'Hannah', 'Baker', 'HR', 'Recruiter', 'hannah.baker@example.com', '(555) 012-3456', '2021-08-30', 'Active'
-            WHERE NOT EXISTS (SELECT 1 FROM employees);
-        ";
+            "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status)
+             SELECT 'Hannah', 'Baker', 'HR', 'Recruiter', 'hannah.baker@example.com', '(555) 012-3456', '2021-08-30', 'Active'
+             WHERE NOT EXISTS (SELECT 1 FROM employees);"
+        ];
 
-        // Execute the SQL script
-        $pdo->exec($sql);
+        // Execute each insert statement individually
+        foreach ($insertStatements as $insertStatement) {
+            $pdo->exec($insertStatement);
+        }
     }
 
     // Fetch data from the employees table
