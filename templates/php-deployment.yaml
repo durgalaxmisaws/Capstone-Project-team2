@@ -120,5 +120,5 @@ spec:
           hostPath:
             path: {{ .Values.postgres.hostPath.path }}  # Use the specified hostPath for Postgres
         - name: config-volume
-      #    configMap:
-      #      name: {{ .Release.Name }}-init-sql-configmap  # Reference your ConfigMap here
+          configMap:
+            name: {{ .Release.Name }}-init-sql-configmap  # Reference your ConfigMap here
