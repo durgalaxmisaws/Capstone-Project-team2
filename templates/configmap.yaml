@@ -3,41 +3,19 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-init-sql-configmap
 data:
-  init-db: |
-    #!/usr/bin/env php
-    <?php
-    $dbname = '/var/www/html/employees.db';
-
-    try {
-        $pdo = new PDO("sqlite:$dbname");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        // Create the employees table
-        $sql = "CREATE TABLE IF NOT EXISTS employees (
-            employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            first_name TEXT,
-            last_name TEXT,
-            department TEXT,
-            job_title TEXT,
-            email TEXT,
-            phone_number TEXT,
-            hire_date DATE,
-            status TEXT
-        )";
-        $pdo->exec($sql);
-        
-        // Insert initial data
-        $insert_sql = "INSERT INTO employees (first_name, last_name, department, job_title, email, phone_number, hire_date, status) VALUES
-            ('John', 'Doe', 'IT', 'Software Engineer', 'john.doe@example.com', '1234567890', '2023-01-15', 'Active'),
-            ('Jane', 'Smith', 'HR', 'HR Manager', 'jane.smith@example.com', '0987654321', '2023-01-20', 'Active'),
-            ('Mark', 'Brown', 'Sales', 'Sales Representative', 'mark.brown@example.com', '1122334455', '2023-01-25', 'Inactive')";
-        $pdo->exec($insert_sql);
-        
-        echo "SQLite database created with table 'employees' and initial data inserted.";
-    } catch (PDOException $e) {
-        echo "Database error: " . $e->getMessage();
-    }
-    ?>
+  init.sql: |
+    -- Create the employees table if it doesn't exist
+    CREATE TABLE IF NOT EXISTS employees (
+      employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      first_name TEXT,
+      last_name TEXT,
+      department TEXT,
+      job_title TEXT,
+      email TEXT,
+      phone_number TEXT,
+      hire_date DATE,
+      status TEXT
+    );
 
   index.php: |
     <!DOCTYPE html>
@@ -103,21 +81,53 @@ data:
         </script>
     </head>
     <body>
-        <h1>Employees List</h1>
-        <!-- Search Box -->
-        <input type="text" id="searchInput" onkeyup="searchUsers()" placeholder="Search for names or emails..">
-        <table id="employeesTable">
-            <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Department</th>
-                <th>Job Title</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Hire Date</th>
-                <th>Status</th>
-            </tr>
-        </table>
+
+    <h1>Employees List</h1>
+
+    <!-- Search Box -->
+    <input type="text" id="searchInput" onkeyup="searchUsers()" placeholder="Search for names or emails..">
+
+    <?php
+    // Connection details
+    $dbname = '/var/www/html/employees.db'; // Path to your SQLite database file
+
+    // Create a new PDO instance for SQLite
+    $dsn = "sqlite:$dbname";
+
+    try {
+        // Connect to SQLite database
+        $pdo = new PDO($dsn);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Fetch data from the employees table
+        $stmt = $pdo->query("SELECT * FROM employees");
+        $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Start of table
+        echo "<table id='employeesTable'>";
+        echo "<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Department</th><th>Job Title</th><th>Email</th><th>Phone</th><th>Hire Date</th><th>Status</th></tr>";
+
+        // Display the employees in the table
+        foreach ($employees as $employee) {
+            echo "<tr>
+                    <td>{$employee['employee_id']}</td>
+                    <td>{$employee['first_name']}</td>
+                    <td>{$employee['last_name']}</td>
+                    <td>{$employee['department']}</td>
+                    <td>{$employee['job_title']}</td>
+                    <td>{$employee['email']}</td>
+                    <td>{$employee['phone_number']}</td>
+                    <td>{$employee['hire_date']}</td>
+                    <td>{$employee['status']}</td>
+                  </tr>";
+        }
+
+        echo "</table>";
+
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+    ?>
+
     </body>
     </html>
