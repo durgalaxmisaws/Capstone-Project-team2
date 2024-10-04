@@ -58,6 +58,9 @@ spec:
           volumeMounts:
             - name: php-persistent-storage
               mountPath: /var/www/html
+            - name: config-volume
+              mountPath: /var/www/html/init-db.php  # Mount the init-db.php file
+              subPath: init-db.php  # This is the file name in the ConfigMap
 
       containers:
         - name: php
